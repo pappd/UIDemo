@@ -3,39 +3,73 @@ import 'package:scrolling_ui/model/transaction.dart';
 
 class TransactionCard extends StatelessWidget {
   final Transaction data;
-  const TransactionCard(this.data, {Key key}) : super(key: key);
+  final int colorIndex;
+  static const myColors = [
+    Colors.indigo,
+    Colors.indigoAccent,
+    Colors.black,
+    Colors.blue,
+    Colors.orange,
+    Colors.deepOrange,
+    Colors.purple,
+    Colors.deepPurple,
+    Colors.red,
+    Colors.amberAccent,
+  ];
+  const TransactionCard(this.data, {Key key, this.colorIndex})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.fromLTRB(0, 5, 10, 5),
-      leading: Container(
-        margin: EdgeInsets.all(0),
-        height: 75,
-        width: 75,
-        decoration: BoxDecoration(
-          color: Colors.orangeAccent,
-          shape: BoxShape.circle,
-        ),
-        child: Center(
-          child: Text(
-            "${data.name.split(" ")[0][0]}${data.name.split(" ")[1][0]}",
-            style: TextStyle(fontSize: 22, color: Colors.white),
+    return Container(
+      height: 50,
+      margin: EdgeInsets.fromLTRB(10, 10, 10, 5),
+      child: Row(
+        children: <Widget>[
+          Container(
+            margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
+            height: 40,
+            width: 40,
+            decoration: BoxDecoration(
+              color: colorIndex != null && colorIndex < 10
+                  ? myColors[colorIndex]
+                  : (data.name == null ? Colors.green : Colors.orangeAccent),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: data.name == null
+                  ? Icon(Icons.arrow_upward, size: 28, color: Colors.white)
+                  : Text(
+                      "${data.name.split(" ")[0][0]}${data.name.split(" ")[1][0]}",
+                      style: TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+            ),
           ),
-        ),
-      ),
-      title: Text(
-        "${data.name}",
-        style: TextStyle(
-          fontSize: 20,
-        ),
-      ),
-      subtitle: Text("${data.date.toString().substring(0, 16)}"),
-      trailing: Text(
-        "${data.name == null ? "+" : "-"}${data.amount}",
-        style: TextStyle(
-          fontSize: 20,
-        ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Text(
+                  "${data.name ?? "Top-Up"}",
+                  style: TextStyle(
+                    fontSize: 18,
+                  ),
+                ),
+                Text(
+                  "${data.date.toString().substring(0, 16)}",
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            "${data.name == null ? "+" : "-"}${data.amount}€",
+            style: TextStyle(
+              fontSize: 18,
+            ),
+          ),
+        ],
       ),
     );
   }

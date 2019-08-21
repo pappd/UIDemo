@@ -91,17 +91,20 @@ class _MyHomePageState extends State<MyHomePage> {
           // center the children vertically; the main axis here is the vertical
           // axis because Columns are vertical (the cross axis would be
           // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
+            for (int i = 5; i < 10; i++)
+              TransactionCard(
+                Transaction(125, name: "Nagy Peter", date: DateTime.now()),
+                colorIndex: i,
+              ),
             TransactionCard(
                 Transaction(125, name: "Nagy Peter", date: DateTime.now())),
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
+            TransactionCard(
+                Transaction(16, name: "Nagy Gergo", date: DateTime.now())),
+            TransactionCard(Transaction(125, date: DateTime.now())),
+            TransactionCard(
+                Transaction(125, name: "Nagy Peter", date: DateTime.now())),
           ],
         ),
       ),
