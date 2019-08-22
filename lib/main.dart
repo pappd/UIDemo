@@ -1,118 +1,183 @@
 import 'package:flutter/material.dart';
+import 'package:scrolling_ui/currency_balance.dart';
 import 'package:scrolling_ui/model/transaction.dart';
+import 'package:scrolling_ui/pickerr.dart';
 import 'package:scrolling_ui/transaction_card.dart';
+import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
+import 'dart:math';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
+      home: Scaffold(
+        appBar: AppBar(title: Text('Collapsing List Demo')),
+        body: CollapsingList(),
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  _SliverAppBarDelegate({
+    @required this.minHeight,
+    @required this.maxHeight,
+    @required this.child,
+  });
+  final double minHeight;
+  final double maxHeight;
+  final Widget child;
+  @override
+  double get minExtent => minHeight;
+  @override
+  double get maxExtent => max(maxHeight, minHeight);
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return SizedBox.expand(
+      child: Stack(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              Icon(Icons.arrow_upward),
+              Icon(Icons.arrow_drop_down_circle),
+            ],
+          ),
+          SizedBox.expand(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                //Text("${shrinkOffset}"),
+                Container(
+                  width: 350,
+                  height: 70,
+                  child: CurrencyBalance(
+                    visibility:
+                        max((200 - 100 - shrinkOffset) / (200 - 100), 0.0),
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
+    return maxHeight != oldDelegate.maxHeight ||
+        minHeight != oldDelegate.minHeight ||
+        child != oldDelegate.child;
+  }
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+class CollapsingList extends StatelessWidget {
+  SliverPersistentHeader makeHeader(String headerText) {
+    return SliverPersistentHeader(
+      pinned: true,
+      delegate: _SliverAppBarDelegate(
+        minHeight: 70.0,
+        maxHeight: 200.0,
+        child: Container(
+            color: Colors.lightBlue, child: Center(child: Text(headerText))),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            for (int i = 5; i < 10; i++)
-              TransactionCard(
-                Transaction(125, name: "Nagy Peter", date: DateTime.now()),
-                colorIndex: i,
-              ),
-            TransactionCard(
-                Transaction(125, name: "Nagy Peter", date: DateTime.now())),
-            TransactionCard(
-                Transaction(16, name: "Nagy Gergo", date: DateTime.now())),
-            TransactionCard(Transaction(125, date: DateTime.now())),
-            TransactionCard(
-                Transaction(125, name: "Nagy Peter", date: DateTime.now())),
+    return CustomScrollView(
+      slivers: <Widget>[
+        makeHeader('Header Section 1'),
+        SliverGrid.count(
+          crossAxisCount: 3,
+          children: [
+            Container(color: Colors.red, height: 150.0),
+            Container(color: Colors.purple, height: 150.0),
+            Container(color: Colors.green, height: 150.0),
+            Container(color: Colors.orange, height: 150.0),
+            Container(color: Colors.yellow, height: 150.0),
+            Container(color: Colors.pink, height: 150.0),
+            Container(color: Colors.cyan, height: 150.0),
+            Container(color: Colors.indigo, height: 150.0),
+            Container(color: Colors.blue, height: 150.0),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+        makeHeader('Header Section 2'),
+        SliverFixedExtentList(
+          itemExtent: 150.0,
+          delegate: SliverChildListDelegate(
+            [
+              // CurrencyPicker(
+              //   onChanged: (num) {},
+              //   initialValue: 1,
+              // ),
+              // Container(
+              //   child: Row(
+              //     children: <Widget>[
+              //       CurrencyBalance(),
+              //     ],
+              //   ),
+              //   //color: Colors.blueAccent,
+              // ),
+              Container(
+                color: Colors.red,
+                height: 50,
+                child: FittedBox(
+                  child: Text(
+                    "hosszi fngremlk neirmfe  pvrsadd vege",
+                    softWrap: true,
+                    style: TextStyle(fontSize: 40),
+                    maxLines: 3,
+                  ),
+                ),
+              ),
+              Container(color: Colors.purple),
+              Container(color: Colors.green),
+              Container(color: Colors.orange),
+              Container(color: Colors.yellow),
+            ],
+          ),
+        ),
+        //makeHeader('Header Section 3'),
+        SliverGrid(
+          gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 200.0,
+            mainAxisSpacing: 10.0,
+            crossAxisSpacing: 10.0,
+            childAspectRatio: 4.0,
+          ),
+          delegate: new SliverChildBuilderDelegate(
+            (BuildContext context, int index) {
+              return new Container(
+                alignment: Alignment.center,
+                color: Colors.teal[100 * (index % 9)],
+                child: new Text('grid item $index'),
+              );
+            },
+            childCount: 20,
+          ),
+        ),
+        //makeHeader('Header Section 4'),
+        // Yes, this could also be a SliverFixedExtentList. Writing
+        // this way just for an example of SliverList construction.
+        SliverList(
+          delegate: SliverChildListDelegate(
+            [
+              Container(color: Colors.pink, height: 150.0),
+              Container(color: Colors.cyan, height: 150.0),
+              Container(color: Colors.indigo, height: 150.0),
+              Container(color: Colors.blue, height: 150.0),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

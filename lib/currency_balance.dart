@@ -2,20 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 class CurrencyBalance extends StatefulWidget {
-  double visibility;
-  CurrencyBalance({Key key, this.visibility = 1}) : super(key: key);
+  final double visibility;
+  const CurrencyBalance({Key key, this.visibility = 1}) : super(key: key);
 
   @override
   _CurrencyBalanceState createState() {
-    return _CurrencyBalanceState(visibility);
+    return _CurrencyBalanceState();
   }
 }
 
 class _CurrencyBalanceState extends State<CurrencyBalance> {
-  final double visibility;
   int selectedValue = 1;
-
-  _CurrencyBalanceState(this.visibility);
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +21,7 @@ class _CurrencyBalanceState extends State<CurrencyBalance> {
       onChanged: (value) => setState(() => selectedValue = value),
       listViewWidth: 350,
       selectedValue: selectedValue,
-      visibilityFactor: visibility,
+      visibilityFactor: widget.visibility,
     );
   }
 }
@@ -58,7 +55,7 @@ class CurrencyPicker extends StatelessWidget {
   CurrencyPicker(
       /* this.balances, this.longCurrencyNames, this.shortCurrencyNames, */
       {Key key,
-      this.maxFontSize = 48,
+      this.maxFontSize = 24,
       this.minFontSize = 18,
       this.visibilityFactor = 1,
       this.onChanged,
@@ -72,7 +69,7 @@ class CurrencyPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fontSize =
-        maxFontSize - visibilityFactor * (maxFontSize - minFontSize);
+        maxFontSize + (visibilityFactor - 1) * (maxFontSize - minFontSize);
     final defaultStyle = TextStyle(
         fontSize: fontSize, color: Colors.grey.withOpacity(visibilityFactor));
     final selectedStyle = TextStyle(fontSize: fontSize, color: Colors.black);
@@ -121,7 +118,6 @@ class CurrencyPicker extends StatelessWidget {
           (notification.metrics.pixels + listViewWidth / 2) ~/
               (listViewWidth / 3);
       int intValueInTheMiddle = intIndexOfMiddleElement - 1;
-      print(intIndexOfMiddleElement.toString());
 
       if (_userStoppedScrolling(notification, _scrollController)) {
         //center selected value
