@@ -7,6 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'dart:math';
 
+import 'animated_column.dart';
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -61,6 +63,18 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
                         max((200 - 100 - shrinkOffset) / (200 - 100), 0.0),
                   ),
                 ),
+                Container(
+                  height: 70,
+                  child: AnimatedColumn(
+                    Icon(Icons.arrow_drop_down_circle),
+                    Container(
+                      color: Colors.pink,
+                      height: 20,
+                    ),
+                    Icon(Icons.arrow_drop_down_circle),
+                    scale: max((300 - 200 - shrinkOffset) / (300 - 200), 0.0),
+                  ),
+                ),
               ],
             ),
           )
@@ -83,8 +97,8 @@ class CollapsingList extends StatelessWidget {
     return SliverPersistentHeader(
       pinned: true,
       delegate: _SliverAppBarDelegate(
-        minHeight: 70.0,
-        maxHeight: 200.0,
+        minHeight: 170.0,
+        maxHeight: 300.0,
         child: Container(
             color: Colors.lightBlue, child: Center(child: Text(headerText))),
       ),
