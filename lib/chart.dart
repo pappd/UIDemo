@@ -21,10 +21,11 @@ class Chart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final height = 170.0;
     return NotificationListener(
       child: Container(
         color: Colors.white,
-        height: 100,
+        height: height,
         width: width,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
@@ -37,7 +38,7 @@ class Chart extends StatelessWidget {
               children: <Widget>[
                 Container(
                   width: 40,
-                  height: 100 / elements.reduce(max) * elements[index],
+                  height: height / elements.reduce(max) * elements[index],
                   color: index == selectedIndex
                       ? Colors.blue[900]
                       : Colors.blueAccent,

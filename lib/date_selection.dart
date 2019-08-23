@@ -36,6 +36,7 @@ class DateSelection extends StatelessWidget {
 
     return Container(
       color: Colors.white,
+      margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[

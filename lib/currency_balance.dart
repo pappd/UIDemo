@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -78,6 +80,7 @@ class CurrencyPicker extends StatelessWidget {
     return NotificationListener(
       child: Container(
         width: listViewWidth,
+        height: 35 + visibilityFactor * 15,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
           controller: _scrollController,
@@ -99,8 +102,10 @@ class CurrencyPicker extends StatelessWidget {
                       children: <Widget>[
                         Text("${balances[value]} ${shortCurrencyNames[value]}",
                             style: itemStyle),
-                        Text("${longCurrencyNames[value]}",
-                            style: defaultStyle.merge(TextStyle(fontSize: 14))),
+                        if (visibilityFactor > 0.3)
+                          Text("${longCurrencyNames[value]}",
+                              style:
+                                  defaultStyle.merge(TextStyle(fontSize: 14))),
                       ],
                     ),
                   );

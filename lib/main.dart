@@ -15,7 +15,10 @@ import 'dart:math';
 
 import 'animated_column.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  //debugPaintSizeEnabled = true;
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -32,8 +35,8 @@ class MyApp extends StatelessWidget {
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   _SliverAppBarDelegate({
     this.data,
-    this.minHeight = 270,
-    this.maxHeight = 500,
+    this.minHeight = 280,
+    this.maxHeight = 370,
     this.child,
   });
   final double minHeight;
@@ -47,7 +50,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return SizedBox.expand(
+    return Container(
+      color: Colors.white,
       child: Stack(
         children: <Widget>[
           Container(
@@ -60,30 +64,33 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
               ],
             ),
           ),
-          SizedBox.expand(
+          Container(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Container(
+                  margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
                   width: 350,
-                  height: 70,
                   child: CurrencyBalance(
-                    visibility:
-                        max((200 - 100 - shrinkOffset) / (200 - 100), 0.0),
+                    visibility: max(
+                        (maxHeight - minHeight - shrinkOffset) /
+                            (maxHeight - minHeight),
+                        0.0),
                   ),
                 ),
-                Container(
-                  height: 130,
-                  child: AnimatedColumn(
-                    ThreeButtons(),
-                    child,
-                    DateSelection(
-                      list: data.transactions,
-                      selectedIndex: 1,
-                    ),
-                    scale: max((300 - 200 - shrinkOffset) / (300 - 200), 0.0),
+                AnimatedColumn(
+                  ThreeButtons(),
+                  child,
+                  DateSelection(
+                    list: data.transactions,
+                    selectedIndex: 1,
                   ),
+                  maxHeight: 255,
+                  scale: max(
+                      (maxHeight - minHeight - shrinkOffset) /
+                          (maxHeight - minHeight),
+                      0.0),
                 ),
               ],
             ),
@@ -143,7 +150,7 @@ class _CollapsingListState extends State<CollapsingList> {
     }
   }
 
-  SliverPersistentHeader makeHeader(String headerText) {
+  SliverPersistentHeader makeHeader() {
     return SliverPersistentHeader(
       pinned: true,
       floating: true,
@@ -197,7 +204,7 @@ class _CollapsingListState extends State<CollapsingList> {
       child: CustomScrollView(
         controller: _scrollController,
         slivers: <Widget>[
-          makeHeader('Header Section 2'),
+          makeHeader(),
           SliverFixedExtentList(
             itemExtent: 60.0,
             delegate: SliverChildListDelegate(
