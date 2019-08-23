@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:scrolling_ui/chart.dart';
 import 'package:scrolling_ui/currency_balance.dart';
+import 'package:scrolling_ui/date_selection.dart';
 import 'package:scrolling_ui/model/main_model.dart';
 import 'package:scrolling_ui/model/transaction.dart';
 import 'package:scrolling_ui/transaction_card.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
-import 'package:scrolling_ui/two_list.dart';
 import 'dart:math';
 
 import 'animated_column.dart';
@@ -119,18 +119,6 @@ class _CollapsingListState extends State<CollapsingList> {
     super.initState();
     data.createRandomTransactions();
     Timer.periodic(Duration(milliseconds: 16), (timer) {
-      // print("delta: ${previousScrollPosition - scrollPosition}");
-      // print("prev                              $previousScrollPosition");
-      // print(
-      //     "atk:                                                   $scrollPosition");
-      // if ((previousScrollPosition - scrollPosition).abs() > 5) {
-      //   setState(() {
-      //     selectedIndex = (scrollPosition + 0) ~/ (360 / 8);
-      //     print(selectedIndex.toString());
-      //   });
-      //   _scrollController2.jumpTo(scrollPosition);
-      //   previousScrollPosition = scrollPosition;
-      // }
       chartCallback(scrollPosition, isVertical: true);
     });
   }
@@ -144,6 +132,10 @@ class _CollapsingListState extends State<CollapsingList> {
       if (isVertical) {
         _scrollController2.jumpTo(position);
         previousScrollPosition = position;
+      } else {
+        // TODO
+        _scrollController.animateTo(position,
+            duration: Duration(milliseconds: 1000), curve: ElasticOutCurve());
       }
     }
   }
@@ -156,16 +148,22 @@ class _CollapsingListState extends State<CollapsingList> {
         minHeight: 170.0,
         maxHeight: 300.0,
         child: Container(
-            color: Colors.lightBlue,
-            child: Chart(
-              elements: [
-                for (int i = 0; i < data.transactions.length; i++)
-                  data.transactions[i].amount
-              ],
-              controller: _scrollController2,
-              selectedIndex: selectedIndex,
-              onChanged: chartCallback,
-            )),
+          color: Colors.lightBlue,
+          child:
+              /* Chart(
+            elements: [
+              for (int i = 0; i < data.transactions.length; i++)
+                data.transactions[i].amount
+            ],
+            controller: _scrollController2,
+            selectedIndex: selectedIndex,
+            onChanged: chartCallback,
+          ), */
+              DateSelection(
+            list: data.transactions,
+            selectedIndex: 1,
+          ),
+        ),
       ),
     );
   }
@@ -232,18 +230,6 @@ class _CollapsingListState extends State<CollapsingList> {
             itemExtent: 150.0,
             delegate: SliverChildListDelegate(
               [
-                // CurrencyPicker(
-                //   onChanged: (num) {},
-                //   initialValue: 1,
-                // ),
-                // Container(
-                //   child: Row(
-                //     children: <Widget>[
-                //       CurrencyBalance(),
-                //     ],
-                //   ),
-                //   //color: Colors.blueAccent,
-                // ),
                 Container(
                   color: Colors.red,
                   height: 50,
@@ -282,9 +268,6 @@ class _CollapsingListState extends State<CollapsingList> {
               childCount: 20,
             ),
           ),
-          //makeHeader('Header Section 4'),
-          // Yes, this could also be a SliverFixedExtentList. Writing
-          // this way just for an example of SliverList construction.
           SliverList(
             delegate: SliverChildListDelegate(
               [

@@ -39,10 +39,10 @@ class MainModel {
       transferTo(
         random.nextInt(contacts.length - 1),
         random.nextDouble() * 500,
-        DateTime.now().subtract(
+        DateTime(2019, 4, 29, 8).add(
           Duration(
             hours: random.nextInt(12),
-            days: random.nextInt(75),
+            days: i,
           ),
         ),
       );
