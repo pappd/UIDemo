@@ -19,6 +19,11 @@ class Chart extends StatelessWidget {
     this.width = 360,
   }) : super(key: key);
 
+  static double toMyPositon(double globalPosition) =>
+      globalPosition * itemWidth;
+
+  static double toGlobalPositon(double myPosition) => myPosition / itemWidth;
+
   @override
   Widget build(BuildContext context) {
     final height = 170.0;
@@ -54,9 +59,9 @@ class Chart extends StatelessWidget {
 
   bool _onNotification(Notification notification) {
     if (notification is ScrollNotification) {
-      if (_userStoppedScrolling(notification, controller) &&
+      if (/* _userStoppedScrolling(notification, controller) && */
           notification.metrics.axis == Axis.horizontal) {
-        onChanged(min(notification.metrics.pixels, 960));
+        onChanged(Chart.toGlobalPositon(notification.metrics.pixels));
       }
     }
     return true;

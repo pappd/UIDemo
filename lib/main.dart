@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: Text('Collapsing List Demo')),
+        appBar: AppBar(title: Text('Scrolling List Demo by David Papp')),
         body: CollapsingList(),
       ),
     );
@@ -109,19 +109,41 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 }
 
 class CollapsingList extends StatefulWidget {
+  static const transactionItemHeight = 60.0;
+  static const minSliverAppBarHeight = 280.0;
+  static const maxSliverAppBarHeight = 370.0;
+
+  static int index(double globalPosition) =>
+      globalPosition * transactionItemHeight ~/ transactionItemHeight;
+
+  static double toMyPositon(double globalPosition) =>
+      globalPosition * transactionItemHeight +
+      (maxSliverAppBarHeight - minSliverAppBarHeight);
+
+  static double toGlobalPositon(double myPosition) =>
+      max(myPosition - (maxSliverAppBarHeight - minSliverAppBarHeight), 0) /
+      transactionItemHeight;
+
   @override
   _CollapsingListState createState() => _CollapsingListState();
 }
 
+enum ScrollingAnimation {
+  //notAllowed,
+  mainViewHasTo,
+  charHasTo,
+}
+
 class _CollapsingListState extends State<CollapsingList> {
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _mainScrollController = ScrollController();
 
-  final ScrollController _scrollController2 = ScrollController();
+  final ScrollController _chartScrollController = ScrollController();
 
-  //bool mutex = true;
-  double scrollPosition = 0;
-  double previousScrollPosition = 0;
+  double globalPosition = 0;
+  double previousGlobalPosition = 0;
   int selectedIndex = 0;
+  var scrollingAnimation = ScrollingAnimation.charHasTo;
+  var isScrollingAnimationAllowed = true;
   var data = MainModel();
 
   @override
@@ -129,23 +151,39 @@ class _CollapsingListState extends State<CollapsingList> {
     super.initState();
     data.createRandomTransactions();
     Timer.periodic(Duration(milliseconds: 16), (timer) {
-      chartCallback(scrollPosition, isVertical: true);
+      if ((previousGlobalPosition - globalPosition).abs() > 5 / 60) {
+        previousGlobalPosition = globalPosition;
+        if (scrollingAnimation == ScrollingAnimation.mainViewHasTo &&
+            isScrollingAnimationAllowed) {
+          isScrollingAnimationAllowed = false;
+          _mainScrollController
+              .jumpTo(CollapsingList.toMyPositon(globalPosition));
+          isScrollingAnimationAllowed = true;
+        } else if (scrollingAnimation == ScrollingAnimation.charHasTo &&
+            isScrollingAnimationAllowed) {
+          isScrollingAnimationAllowed = false;
+          _chartScrollController.jumpTo(Chart.toMyPositon(globalPosition));
+          isScrollingAnimationAllowed = true;
+        }
+      }
     });
   }
 
-  void chartCallback(double position, {bool isVertical = false}) {
-    if ((previousScrollPosition - position).abs() > 5) {
-      setState(() {
-        selectedIndex = (position + 0) ~/ (360 / 8);
-        print(selectedIndex.toString());
-      });
+  void chartCallback(double newGlobalPosition, {bool isVertical = false}) {
+    globalPosition = newGlobalPosition;
+    if ((previousGlobalPosition - newGlobalPosition).abs() > 5 / 60) {
+      if (selectedIndex != CollapsingList.index(newGlobalPosition)) {
+        setState(() {
+          selectedIndex = CollapsingList.index(newGlobalPosition);
+        });
+      }
+
       if (isVertical) {
-        _scrollController2.jumpTo(position);
-        previousScrollPosition = position;
+        //Main List moving
+        scrollingAnimation = ScrollingAnimation.charHasTo;
       } else {
-        // TODO
-        _scrollController.animateTo(position,
-            duration: Duration(milliseconds: 1000), curve: ElasticOutCurve());
+        // Chart moving
+        scrollingAnimation = ScrollingAnimation.mainViewHasTo;
       }
     }
   }
@@ -155,13 +193,15 @@ class _CollapsingListState extends State<CollapsingList> {
       pinned: true,
       floating: true,
       delegate: _SliverAppBarDelegate(
+        maxHeight: CollapsingList.maxSliverAppBarHeight,
+        minHeight: CollapsingList.minSliverAppBarHeight,
         data: data,
         child: Chart(
           elements: [
             for (int i = 0; i < data.transactions.length; i++)
               data.transactions[i].amount
           ],
-          controller: _scrollController2,
+          controller: _chartScrollController,
           selectedIndex: selectedIndex,
           onChanged: chartCallback,
         ),
@@ -173,15 +213,18 @@ class _CollapsingListState extends State<CollapsingList> {
     if (notification is ScrollNotification) {
       //print(notification.metrics.pixels.toString());
       if (notification.metrics.axis == Axis.vertical) {
-        scrollPosition = min(notification.metrics.pixels, 960);
+        //scrollPosition = min(notification.metrics.pixels, 960);
+        chartCallback(
+            CollapsingList.toGlobalPositon(notification.metrics.pixels),
+            isVertical: true);
       }
 
-      if (_userStoppedScrolling(notification, _scrollController)) {
+      if (_userStoppedScrolling(notification, _mainScrollController)) {
         if (notification.metrics.pixels < 40) {
-          _scrollController.animateTo(0,
+          _mainScrollController.animateTo(0,
               duration: Duration(milliseconds: 1000), curve: ElasticOutCurve());
         } else if (notification.metrics.pixels < 100) {
-          _scrollController.animateTo(130,
+          _mainScrollController.animateTo(130,
               duration: Duration(milliseconds: 1000), curve: ElasticOutCurve());
         }
       }
@@ -202,11 +245,11 @@ class _CollapsingListState extends State<CollapsingList> {
     return NotificationListener(
       onNotification: _onNotification,
       child: CustomScrollView(
-        controller: _scrollController,
+        controller: _mainScrollController,
         slivers: <Widget>[
           makeHeader(),
           SliverFixedExtentList(
-            itemExtent: 60.0,
+            itemExtent: CollapsingList.transactionItemHeight,
             delegate: SliverChildListDelegate(
               [
                 for (int i = 0; i < data.transactions.length; i++)
