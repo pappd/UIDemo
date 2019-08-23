@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:scrolling_ui/chart.dart';
 import 'package:scrolling_ui/currency_balance.dart';
+import 'package:scrolling_ui/model/main_model.dart';
 import 'package:scrolling_ui/model/transaction.dart';
 import 'package:scrolling_ui/transaction_card.dart';
 import 'package:flutter/foundation.dart';
@@ -94,9 +98,56 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
-class CollapsingList extends StatelessWidget {
+class CollapsingList extends StatefulWidget {
+  @override
+  _CollapsingListState createState() => _CollapsingListState();
+}
+
+class _CollapsingListState extends State<CollapsingList> {
   final ScrollController _scrollController = ScrollController();
+
   final ScrollController _scrollController2 = ScrollController();
+
+  //bool mutex = true;
+  double scrollPosition = 0;
+  double previousScrollPosition = 0;
+  int selectedIndex = 0;
+  var data = MainModel();
+
+  @override
+  void initState() {
+    super.initState();
+    data.createRandomTransactions();
+    Timer.periodic(Duration(milliseconds: 16), (timer) {
+      // print("delta: ${previousScrollPosition - scrollPosition}");
+      // print("prev                              $previousScrollPosition");
+      // print(
+      //     "atk:                                                   $scrollPosition");
+      // if ((previousScrollPosition - scrollPosition).abs() > 5) {
+      //   setState(() {
+      //     selectedIndex = (scrollPosition + 0) ~/ (360 / 8);
+      //     print(selectedIndex.toString());
+      //   });
+      //   _scrollController2.jumpTo(scrollPosition);
+      //   previousScrollPosition = scrollPosition;
+      // }
+      chartCallback(scrollPosition, isVertical: true);
+    });
+  }
+
+  void chartCallback(double position, {bool isVertical = false}) {
+    if ((previousScrollPosition - position).abs() > 5) {
+      setState(() {
+        selectedIndex = (position + 0) ~/ (360 / 8);
+        print(selectedIndex.toString());
+      });
+      if (isVertical) {
+        _scrollController2.jumpTo(position);
+        previousScrollPosition = position;
+      }
+    }
+  }
+
   SliverPersistentHeader makeHeader(String headerText) {
     return SliverPersistentHeader(
       pinned: true,
@@ -106,8 +157,14 @@ class CollapsingList extends StatelessWidget {
         maxHeight: 300.0,
         child: Container(
             color: Colors.lightBlue,
-            child: TwoList(
+            child: Chart(
+              elements: [
+                for (int i = 0; i < data.transactions.length; i++)
+                  data.transactions[i].amount
+              ],
               controller: _scrollController2,
+              selectedIndex: selectedIndex,
+              onChanged: chartCallback,
             )),
       ),
     );
@@ -116,14 +173,8 @@ class CollapsingList extends StatelessWidget {
   bool _onNotification(Notification notification) {
     if (notification is ScrollNotification) {
       //print(notification.metrics.pixels.toString());
-      final scrollPosition = notification.metrics.pixels;
-      if (scrollPosition < 200) {
-        // _scrollController2.
-        _scrollController2.jumpTo(max(2, min(scrollPosition, 200)));
-        // _scrollController2.jumpTo(min(scrollPosition + 5, 200));
-        // _scrollController2.jumpTo(min(scrollPosition + 7, 200));
-        // _scrollController2.jumpTo(min(scrollPosition + 9, 200));
-        // _scrollController2.jumpTo(min(scrollPosition + 11, 200));
+      if (notification.metrics.axis == Axis.vertical) {
+        scrollPosition = min(notification.metrics.pixels, 960);
       }
 
       if (_userStoppedScrolling(notification, _scrollController)) {

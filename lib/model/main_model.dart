@@ -35,7 +35,7 @@ class MainModel {
 
   void createRandomTransactions([int number = 50]) {
     for (int i = 0; i < number; i++) {
-      Random random;
+      var random = Random();
       transferTo(
         random.nextInt(contacts.length - 1),
         random.nextDouble() * 500,
