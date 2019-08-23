@@ -32,8 +32,8 @@ class MyApp extends StatelessWidget {
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   _SliverAppBarDelegate({
     this.data,
-    this.minHeight = 170,
-    this.maxHeight = 300,
+    this.minHeight = 270,
+    this.maxHeight = 500,
     this.child,
   });
   final double minHeight;
@@ -197,78 +197,17 @@ class _CollapsingListState extends State<CollapsingList> {
       child: CustomScrollView(
         controller: _scrollController,
         slivers: <Widget>[
-          SliverList(
-            delegate: SliverChildListDelegate(
-              [
-                //TwoList(),
-              ],
-            ),
-          ),
-          //makeHeader('Header Section 1'),
-          SliverGrid.count(
-            crossAxisCount: 3,
-            children: [
-              Container(color: Colors.red, height: 150.0),
-              Container(color: Colors.purple, height: 150.0),
-              Container(color: Colors.green, height: 150.0),
-              Container(color: Colors.orange, height: 150.0),
-              Container(color: Colors.yellow, height: 150.0),
-              Container(color: Colors.pink, height: 150.0),
-              Container(color: Colors.cyan, height: 150.0),
-              Container(color: Colors.indigo, height: 150.0),
-              Container(color: Colors.blue, height: 150.0),
-            ],
-          ),
           makeHeader('Header Section 2'),
           SliverFixedExtentList(
-            itemExtent: 150.0,
+            itemExtent: 60.0,
             delegate: SliverChildListDelegate(
               [
-                Container(
-                  color: Colors.red,
-                  height: 50,
-                  child: FittedBox(
-                    child: Text(
-                      "hosszi fngremlk neirmfe  pvrsadd vege",
-                      softWrap: true,
-                      style: TextStyle(fontSize: 40),
-                      maxLines: 3,
-                    ),
+                for (int i = 0; i < data.transactions.length; i++)
+                  TransactionCard(
+                    data.transactions[i],
+                    colorIndex:
+                        data.contacts.indexOf(data.transactions[i].name),
                   ),
-                ),
-                Container(color: Colors.purple),
-                Container(color: Colors.green),
-                Container(color: Colors.orange),
-                Container(color: Colors.yellow),
-              ],
-            ),
-          ),
-          //makeHeader('Header Section 3'),
-          SliverGrid(
-            gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 200.0,
-              mainAxisSpacing: 10.0,
-              crossAxisSpacing: 10.0,
-              childAspectRatio: 4.0,
-            ),
-            delegate: new SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                return new Container(
-                  alignment: Alignment.center,
-                  color: Colors.teal[100 * (index % 9)],
-                  child: new Text('grid item $index'),
-                );
-              },
-              childCount: 20,
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildListDelegate(
-              [
-                Container(color: Colors.pink, height: 150.0),
-                Container(color: Colors.cyan, height: 150.0),
-                Container(color: Colors.indigo, height: 150.0),
-                Container(color: Colors.blue, height: 150.0),
               ],
             ),
           ),

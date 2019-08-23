@@ -15,6 +15,16 @@ class TransactionCard extends StatelessWidget {
     Colors.deepPurple,
     Colors.red,
     Colors.amberAccent,
+    Colors.pink,
+    Colors.pinkAccent,
+    Colors.green,
+    Colors.greenAccent,
+    Colors.redAccent,
+    Colors.purpleAccent,
+    Colors.amber,
+    Colors.cyan,
+    Colors.blueGrey,
+    Colors.brown,
   ];
   const TransactionCard(this.data, {Key key, this.colorIndex})
       : super(key: key);
@@ -31,7 +41,7 @@ class TransactionCard extends StatelessWidget {
             height: 40,
             width: 40,
             decoration: BoxDecoration(
-              color: colorIndex != null && colorIndex < 10
+              color: colorIndex != null && colorIndex < 20
                   ? myColors[colorIndex]
                   : (data.name == null ? Colors.green : Colors.orangeAccent),
               shape: BoxShape.circle,
@@ -64,7 +74,7 @@ class TransactionCard extends StatelessWidget {
             ),
           ),
           Text(
-            "${data.name == null ? "+" : "-"}${data.amount}€",
+            "${data.name == null ? "+" : "-"}${data.amount.round()}€",
             style: TextStyle(
               fontSize: 18,
             ),

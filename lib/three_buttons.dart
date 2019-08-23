@@ -16,7 +16,7 @@ class ThreeButtons extends StatelessWidget {
             Column(
               children: <Widget>[
                 Container(
-                  padding: EdgeInsets.all(16),
+                  padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.blue[500],
