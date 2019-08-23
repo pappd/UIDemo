@@ -5,6 +5,7 @@ import 'package:scrolling_ui/model/transaction.dart';
 import 'package:scrolling_ui/transaction_card.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
+import 'package:scrolling_ui/two_list.dart';
 import 'dart:math';
 
 import 'animated_column.dart';
@@ -63,18 +64,20 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
                         max((200 - 100 - shrinkOffset) / (200 - 100), 0.0),
                   ),
                 ),
-                Container(
-                  height: 70,
-                  child: AnimatedColumn(
-                    Icon(Icons.arrow_drop_down_circle),
-                    Container(
-                      color: Colors.pink,
-                      height: 20,
-                    ),
-                    Icon(Icons.arrow_drop_down_circle),
-                    scale: max((300 - 200 - shrinkOffset) / (300 - 200), 0.0),
-                  ),
-                ),
+                child,
+                // Container(
+                //   height: 130,
+                //   child: AnimatedColumn(
+                //     Icon(Icons.arrow_drop_down_circle),
+                //     //child,
+                //     Container(
+                //       color: Colors.pink,
+                //       height: 50,
+                //     ),
+                //     Icon(Icons.arrow_drop_down_circle),
+                //     scale: max((300 - 200 - shrinkOffset) / (300 - 200), 0.0),
+                //   ),
+                // ),
               ],
             ),
           )
@@ -93,21 +96,35 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 
 class CollapsingList extends StatelessWidget {
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController2 = ScrollController();
   SliverPersistentHeader makeHeader(String headerText) {
     return SliverPersistentHeader(
       pinned: true,
+      floating: true,
       delegate: _SliverAppBarDelegate(
         minHeight: 170.0,
         maxHeight: 300.0,
         child: Container(
-            color: Colors.lightBlue, child: Center(child: Text(headerText))),
+            color: Colors.lightBlue,
+            child: TwoList(
+              controller: _scrollController2,
+            )),
       ),
     );
   }
 
   bool _onNotification(Notification notification) {
     if (notification is ScrollNotification) {
-      print(notification.metrics.pixels.toString());
+      //print(notification.metrics.pixels.toString());
+      final scrollPosition = notification.metrics.pixels;
+      if (scrollPosition < 200) {
+        // _scrollController2.
+        _scrollController2.jumpTo(max(2, min(scrollPosition, 200)));
+        // _scrollController2.jumpTo(min(scrollPosition + 5, 200));
+        // _scrollController2.jumpTo(min(scrollPosition + 7, 200));
+        // _scrollController2.jumpTo(min(scrollPosition + 9, 200));
+        // _scrollController2.jumpTo(min(scrollPosition + 11, 200));
+      }
 
       if (_userStoppedScrolling(notification, _scrollController)) {
         if (notification.metrics.pixels < 40) {
@@ -137,7 +154,14 @@ class CollapsingList extends StatelessWidget {
       child: CustomScrollView(
         controller: _scrollController,
         slivers: <Widget>[
-          makeHeader('Header Section 1'),
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [
+                //TwoList(),
+              ],
+            ),
+          ),
+          //makeHeader('Header Section 1'),
           SliverGrid.count(
             crossAxisCount: 3,
             children: [
