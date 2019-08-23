@@ -7,6 +7,7 @@ import 'package:scrolling_ui/currency_balance.dart';
 import 'package:scrolling_ui/date_selection.dart';
 import 'package:scrolling_ui/model/main_model.dart';
 import 'package:scrolling_ui/model/transaction.dart';
+import 'package:scrolling_ui/three_buttons.dart';
 import 'package:scrolling_ui/transaction_card.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
@@ -30,13 +31,15 @@ class MyApp extends StatelessWidget {
 
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   _SliverAppBarDelegate({
-    @required this.minHeight,
-    @required this.maxHeight,
-    @required this.child,
+    this.data,
+    this.minHeight = 170,
+    this.maxHeight = 300,
+    this.child,
   });
   final double minHeight;
   final double maxHeight;
   final Widget child;
+  final MainModel data;
   @override
   double get minExtent => minHeight;
   @override
@@ -47,19 +50,21 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     return SizedBox.expand(
       child: Stack(
         children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              Icon(Icons.arrow_upward),
-              Icon(Icons.arrow_drop_down_circle),
-            ],
+          Container(
+            margin: EdgeInsets.all(10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Icon(Icons.account_balance),
+                Icon(Icons.search),
+              ],
+            ),
           ),
           SizedBox.expand(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                //Text("${shrinkOffset}"),
                 Container(
                   width: 350,
                   height: 70,
@@ -68,20 +73,18 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
                         max((200 - 100 - shrinkOffset) / (200 - 100), 0.0),
                   ),
                 ),
-                child,
-                // Container(
-                //   height: 130,
-                //   child: AnimatedColumn(
-                //     Icon(Icons.arrow_drop_down_circle),
-                //     //child,
-                //     Container(
-                //       color: Colors.pink,
-                //       height: 50,
-                //     ),
-                //     Icon(Icons.arrow_drop_down_circle),
-                //     scale: max((300 - 200 - shrinkOffset) / (300 - 200), 0.0),
-                //   ),
-                // ),
+                Container(
+                  height: 130,
+                  child: AnimatedColumn(
+                    ThreeButtons(),
+                    child,
+                    DateSelection(
+                      list: data.transactions,
+                      selectedIndex: 1,
+                    ),
+                    scale: max((300 - 200 - shrinkOffset) / (300 - 200), 0.0),
+                  ),
+                ),
               ],
             ),
           )
@@ -145,24 +148,15 @@ class _CollapsingListState extends State<CollapsingList> {
       pinned: true,
       floating: true,
       delegate: _SliverAppBarDelegate(
-        minHeight: 170.0,
-        maxHeight: 300.0,
-        child: Container(
-          color: Colors.lightBlue,
-          child:
-              /* Chart(
-            elements: [
-              for (int i = 0; i < data.transactions.length; i++)
-                data.transactions[i].amount
-            ],
-            controller: _scrollController2,
-            selectedIndex: selectedIndex,
-            onChanged: chartCallback,
-          ), */
-              DateSelection(
-            list: data.transactions,
-            selectedIndex: 1,
-          ),
+        data: data,
+        child: Chart(
+          elements: [
+            for (int i = 0; i < data.transactions.length; i++)
+              data.transactions[i].amount
+          ],
+          controller: _scrollController2,
+          selectedIndex: selectedIndex,
+          onChanged: chartCallback,
         ),
       ),
     );
