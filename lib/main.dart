@@ -37,11 +37,11 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     this.data,
     this.minHeight = 280,
     this.maxHeight = 370,
-    this.child,
+    this.children,
   });
   final double minHeight;
   final double maxHeight;
-  final Widget child;
+  final List<Widget> children;
   final MainModel data;
   @override
   double get minExtent => minHeight;
@@ -81,11 +81,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
                 ),
                 AnimatedColumn(
                   ThreeButtons(),
-                  child,
-                  DateSelection(
-                    list: data.transactions,
-                    selectedIndex: 1,
-                  ),
+                  children[0],
+                  children[1],
                   maxHeight: 255,
                   scale: max(
                       (maxHeight - minHeight - shrinkOffset) /
@@ -104,7 +101,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
     return maxHeight != oldDelegate.maxHeight ||
         minHeight != oldDelegate.minHeight ||
-        child != oldDelegate.child;
+        children != oldDelegate.children;
   }
 }
 
@@ -132,6 +129,7 @@ enum ScrollingAnimation {
   //notAllowed,
   mainViewHasTo,
   charHasTo,
+  bothHasTo
 }
 
 class _CollapsingListState extends State<CollapsingList> {
@@ -165,13 +163,32 @@ class _CollapsingListState extends State<CollapsingList> {
           _chartScrollController.jumpTo(Chart.toMyPositon(globalPosition));
           isScrollingAnimationAllowed = true;
         }
+      } else if (scrollingAnimation == ScrollingAnimation.bothHasTo &&
+          isScrollingAnimationAllowed) {
+        isScrollingAnimationAllowed = false;
+        globalPosition = selectedIndex.toDouble();
+        _chartScrollController.jumpTo(Chart.toMyPositon(globalPosition));
+        // _mainScrollController
+        //     .jumpTo(CollapsingList.toMyPositon(globalPosition));
+
+        // _chartScrollController.animateTo(Chart.toMyPositon(globalPosition),
+        //     duration: Duration(milliseconds: 2000), curve: ElasticOutCurve());
+        _mainScrollController.animateTo(
+            CollapsingList.toMyPositon(globalPosition),
+            duration: Duration(milliseconds: 1000),
+            curve: ElasticOutCurve());
+        Future.delayed(Duration(milliseconds: 1010)).then((_) {
+          scrollingAnimation = ScrollingAnimation.charHasTo;
+          return isScrollingAnimationAllowed = true;
+        });
       }
     });
   }
 
   void chartCallback(double newGlobalPosition, {bool isVertical = false}) {
     globalPosition = newGlobalPosition;
-    if ((previousGlobalPosition - newGlobalPosition).abs() > 5 / 60) {
+    if ((previousGlobalPosition - newGlobalPosition).abs() > 5 / 60 &&
+        scrollingAnimation != ScrollingAnimation.bothHasTo) {
       if (selectedIndex != CollapsingList.index(newGlobalPosition)) {
         setState(() {
           selectedIndex = CollapsingList.index(newGlobalPosition);
@@ -191,41 +208,50 @@ class _CollapsingListState extends State<CollapsingList> {
   SliverPersistentHeader makeHeader() {
     return SliverPersistentHeader(
       pinned: true,
-      floating: true,
       delegate: _SliverAppBarDelegate(
-        maxHeight: CollapsingList.maxSliverAppBarHeight,
-        minHeight: CollapsingList.minSliverAppBarHeight,
-        data: data,
-        child: Chart(
-          elements: [
-            for (int i = 0; i < data.transactions.length; i++)
-              data.transactions[i].amount
-          ],
-          controller: _chartScrollController,
-          selectedIndex: selectedIndex,
-          onChanged: chartCallback,
-        ),
-      ),
+          maxHeight: CollapsingList.maxSliverAppBarHeight,
+          minHeight: CollapsingList.minSliverAppBarHeight,
+          data: data,
+          children: [
+            Chart(
+              elements: [
+                for (int i = 0; i < data.transactions.length; i++)
+                  data.transactions[i].amount
+              ],
+              controller: _chartScrollController,
+              selectedIndex: selectedIndex,
+              onChanged: chartCallback,
+            ),
+            DateSelection(
+              list: data.transactions,
+              selectedIndex: selectedIndex,
+              onChanged: (index) {
+                setState(() {
+                  scrollingAnimation = ScrollingAnimation.bothHasTo;
+                  selectedIndex = index;
+                });
+              },
+            ),
+          ]),
     );
   }
 
   bool _onNotification(Notification notification) {
     if (notification is ScrollNotification) {
-      //print(notification.metrics.pixels.toString());
       if (notification.metrics.axis == Axis.vertical) {
-        //scrollPosition = min(notification.metrics.pixels, 960);
         chartCallback(
             CollapsingList.toGlobalPositon(notification.metrics.pixels),
             isVertical: true);
-      }
-
-      if (_userStoppedScrolling(notification, _mainScrollController)) {
-        if (notification.metrics.pixels < 40) {
-          _mainScrollController.animateTo(0,
-              duration: Duration(milliseconds: 1000), curve: ElasticOutCurve());
-        } else if (notification.metrics.pixels < 100) {
-          _mainScrollController.animateTo(130,
-              duration: Duration(milliseconds: 1000), curve: ElasticOutCurve());
+        if (_userStoppedScrolling(notification, _mainScrollController)) {
+          if (notification.metrics.pixels < 40) {
+            _mainScrollController.animateTo(0,
+                duration: Duration(milliseconds: 1000),
+                curve: ElasticOutCurve());
+          } else if (notification.metrics.pixels < 100) {
+            _mainScrollController.animateTo(130,
+                duration: Duration(milliseconds: 1000),
+                curve: ElasticOutCurve());
+          }
         }
       }
     }

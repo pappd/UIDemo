@@ -48,7 +48,7 @@ class DateSelection extends StatelessWidget {
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: selectedIndex == i
+                      color: list[selectedIndex].date.month == dates[i].month
                           ? Colors.blueAccent
                           : Colors.transparent,
                       width: 4,
