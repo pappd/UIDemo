@@ -35,7 +35,7 @@ class CurrencyPicker extends StatelessWidget {
     "Hungarian Forint",
     "American Dollar",
     "Vmi mas",
-    "Megin mas"
+    "Megint mas"
   ];
   final List<String> shortCurrencyNames = ["€", "Ft", "\$", "Vm", 'Mm'];
   final double maxFontSize;

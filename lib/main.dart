@@ -10,7 +10,7 @@ import 'package:scrolling_ui/model/transaction.dart';
 import 'package:scrolling_ui/three_buttons.dart';
 import 'package:scrolling_ui/transaction_card.dart';
 import 'package:flutter/foundation.dart';
-import 'package:provider/provider.dart';
+//import 'package:provider/provider.dart';
 import 'dart:math';
 
 import 'animated_column.dart';
